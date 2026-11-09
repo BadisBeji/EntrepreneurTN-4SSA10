@@ -1,0 +1,19 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+# Java / Maven
+target/
+*.class
+# Angular / Node
+node_modules/
+dist/
+.angular/
+# Secrets et environnement
+.env
+application-local.properties
+# Préparation personnelle (ne pas publier)
+_Preparation_orale_NE_PAS_POUSSER/
+
+# Fichiers temporaires Office
+~$*

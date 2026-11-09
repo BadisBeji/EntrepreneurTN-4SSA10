@@ -1,0 +1,305 @@
+openapi: 3.0.3
+info:
+  title: roadmap-service
+  version: 0.1.0
+  description: "Projets, feuille de route, étapes et progression. Appelle legal-service et finance-service (synchrone) et consomme leurs événements (asynchrone)."
+servers:
+  - url: "http://localhost:8082"
+    description: "local (en production : via l'API Gateway sur 8080)"
+security:
+  - bearerAuth: []
+paths:
+  /api/projects:
+    post:
+      summary: Créer un projet et générer sa feuille de route
+      tags:
+        - projects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectRequest"
+      responses:
+        "201":
+          description: Projet créé (en-tête Location)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectResponse"
+        "400":
+          description: Requête invalide
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "401":
+          description: Non authentifié (JWT absent ou invalide)
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /api/projects/{id}:
+    get:
+      summary: Consulter un projet
+      tags:
+        - projects
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Projet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectResponse"
+        "401":
+          description: Non authentifié (JWT absent ou invalide)
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "403":
+          description: Droits insuffisants
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "404":
+          description: Ressource introuvable
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /api/projects/{id}/roadmap:
+    get:
+      summary: "Feuille de route d'un projet"
+      tags:
+        - roadmap
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Feuille de route et progression
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoadmapResponse"
+        "401":
+          description: Non authentifié (JWT absent ou invalide)
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "404":
+          description: Ressource introuvable
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /api/projects/{id}/steps:
+    get:
+      summary: "Étapes d'un projet, filtrables par statut"
+      tags:
+        - roadmap
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "TODO, IN_PROGRESS ou DONE"
+      responses:
+        "200":
+          description: Liste des étapes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StepResponse"
+        "401":
+          description: Non authentifié (JWT absent ou invalide)
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "404":
+          description: Ressource introuvable
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /api/steps/{id}/status:
+    patch:
+      summary: "Changer le statut d'une étape"
+      tags:
+        - roadmap
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepStatusUpdate"
+      responses:
+        "200":
+          description: Étape mise à jour
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StepResponse"
+        "400":
+          description: Requête invalide
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "401":
+          description: Non authentifié (JWT absent ou invalide)
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "404":
+          description: Ressource introuvable
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Problem:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+    ProjectRequest:
+      type: object
+      required:
+        - name
+        - sector
+        - projectType
+      properties:
+        name:
+          type: string
+        sector:
+          type: string
+        region:
+          type: string
+        projectType:
+          type: string
+          enum:
+            - INDIVIDUEL
+            - SOCIETE
+            - STARTUP
+    ProjectResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        ownerId:
+          type: integer
+          format: int64
+        name:
+          type: string
+        sector:
+          type: string
+        region:
+          type: string
+        projectType:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    StepResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        description:
+          type: string
+        domain:
+          type: string
+          enum:
+            - LEGAL
+            - FINANCE
+            - MARKETING
+        position:
+          type: integer
+        status:
+          type: string
+          enum:
+            - TODO
+            - IN_PROGRESS
+            - DONE
+        refId:
+          type: integer
+          format: int64
+    RoadmapResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        projectId:
+          type: integer
+          format: int64
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+        steps:
+          type: array
+          items:
+            $ref: "#/components/schemas/StepResponse"
+    StepStatusUpdate:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - TODO
+            - IN_PROGRESS
+            - DONE

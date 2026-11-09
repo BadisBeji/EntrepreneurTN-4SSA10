@@ -1,0 +1,360 @@
+openapi: 3.0.3
+info:
+  title: finance-service
+  version: 0.1.0
+  description: "Comptabilité simple, catalogue des aides et financements, demandes. Publie l'événement FundingGranted. Montants DECIMAL(12,3) en dinars tunisiens."
+servers:
+  - url: "http://localhost:8084"
+    description: "local (en production : via l'API Gateway sur 8080)"
+security:
+  - bearerAuth: []
+paths:
+  /api/transactions:
+    post:
+      summary: Enregistrer un revenu ou une dépense
+      tags:
+        - transactions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionRequest"
+      responses:
+        "201":
+          description: Transaction créée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionResponse"
+        "400":
+          description: Requête invalide
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "401":
+          description: Non authentifié (JWT absent ou invalide)
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /api/projects/{id}/transactions:
+    get:
+      summary: "Transactions d'un projet sur une période"
+      tags:
+        - transactions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: string
+          description: date de début (AAAA-MM-JJ)
+        - name: to
+          in: query
+          required: false
+          schema:
+            type: string
+          description: date de fin (AAAA-MM-JJ)
+      responses:
+        "200":
+          description: Liste des transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TransactionResponse"
+        "401":
+          description: Non authentifié (JWT absent ou invalide)
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /api/projects/{id}/summary:
+    get:
+      summary: "Bilan d'un projet (revenus, dépenses, solde)"
+      tags:
+        - transactions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Bilan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SummaryResponse"
+        "401":
+          description: Non authentifié (JWT absent ou invalide)
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /api/funding-options:
+    get:
+      summary: "Lister les aides et financements, filtrables par type de projet"
+      tags:
+        - funding
+      parameters:
+        - name: projectType
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Liste des financements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FundingOptionResponse"
+        "401":
+          description: Non authentifié (JWT absent ou invalide)
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /api/funding-applications:
+    post:
+      summary: Déposer une demande de financement
+      tags:
+        - funding
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationRequest"
+      responses:
+        "201":
+          description: Demande créée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApplicationResponse"
+        "400":
+          description: Requête invalide
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "401":
+          description: Non authentifié (JWT absent ou invalide)
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "404":
+          description: Ressource introuvable
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "409":
+          description: "Conflit avec l'état actuel"
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /api/funding-applications/{id}/status:
+    patch:
+      summary: "Changer le statut d'une demande (ACCEPTED publie FundingGranted)"
+      tags:
+        - funding
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationStatusUpdate"
+      responses:
+        "200":
+          description: Demande mise à jour
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApplicationResponse"
+        "400":
+          description: Requête invalide
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "401":
+          description: Non authentifié (JWT absent ou invalide)
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "404":
+          description: Ressource introuvable
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Problem:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+    TransactionRequest:
+      type: object
+      required:
+        - projectId
+        - type
+        - amount
+        - date
+      properties:
+        projectId:
+          type: integer
+          format: int64
+        type:
+          type: string
+          enum:
+            - INCOME
+            - EXPENSE
+        category:
+          type: string
+        amount:
+          type: number
+          example: 1250.5
+        date:
+          type: string
+          format: date
+        description:
+          type: string
+    TransactionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        projectId:
+          type: integer
+          format: int64
+        type:
+          type: string
+        category:
+          type: string
+        amount:
+          type: number
+        date:
+          type: string
+          format: date
+        description:
+          type: string
+    SummaryResponse:
+      type: object
+      properties:
+        totalIncome:
+          type: number
+        totalExpense:
+          type: number
+        balance:
+          type: number
+    FundingOptionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        providerType:
+          type: string
+        minAmount:
+          type: number
+        maxAmount:
+          type: number
+        conditions:
+          type: string
+        projectType:
+          type: string
+    ApplicationRequest:
+      type: object
+      required:
+        - projectId
+        - fundingOptionId
+        - requestedAmount
+      properties:
+        projectId:
+          type: integer
+          format: int64
+        fundingOptionId:
+          type: integer
+          format: int64
+        requestedAmount:
+          type: number
+    ApplicationResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        projectId:
+          type: integer
+          format: int64
+        fundingOptionId:
+          type: integer
+          format: int64
+        requestedAmount:
+          type: number
+        status:
+          type: string
+          enum:
+            - DRAFT
+            - SUBMITTED
+            - ACCEPTED
+            - REJECTED
+        updatedAt:
+          type: string
+          format: date-time
+    ApplicationStatusUpdate:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - DRAFT
+            - SUBMITTED
+            - ACCEPTED
+            - REJECTED
