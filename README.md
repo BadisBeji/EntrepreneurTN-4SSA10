@@ -2,14 +2,14 @@
 
 Plateforme web qui accompagne les **entrepreneurs et petites agences tunisiennes** dans le lancement et la gestion de leur activité : feuille de route, démarches légales et administratives, comptabilité et financement.
 
-> Projet de l'unité **Architecture web distribuée** (ESPRIT, 4SSA10) – validation intermédiaire (semaine 4) : **conception**. Le code est en cours de développement.
+> Projet de l'unité **Architecture web distribuée** (ESPRIT, 4SSA10) . Le code est en cours de développement.
 
 ## Équipe
 | Membre | Microservice |
 |---|---|
-| [Membre 1] | roadmap-service (+ présente le microservice commun) |
-| [Membre 2] | legal-service |
-| [Membre 3] | finance-service |
+| Badis Beji | roadmap-service (+ présente le microservice commun) |
+| Yakine Sehli| legal-service |
+| Mohammed Saadallah | finance-service |
 
 Microservice commun, développé par toute l'équipe : **auth-service**.
 
