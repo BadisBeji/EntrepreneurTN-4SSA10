@@ -1,6 +1,6 @@
 # finance-service
 
-Comptabilité simple, aides et financements.
+Facturation, comptabilité simple et gestion du capital.
 
 | | |
 |---|---|
@@ -10,8 +10,8 @@ Comptabilité simple, aides et financements.
 | Contrat d'API | [`openapi.yaml`](openapi.yaml) (à ouvrir dans https://editor.swagger.io) |
 
 ## Interactions
-- **Publie** (asynchrone) : `FundingGranted {projectId, applicationId, amount}` quand une demande passe à `ACCEPTED`
-- **Appelé par** : `roadmap-service` (synchrone)
+- **Publie** (asynchrone) : `InvoiceIssued {projectId, invoiceId, issuedAt}` quand une facture passe à `SENT`
+- **Appelé par** : `roadmap-service` (synchrone, bilan)
 
 ## État
 Conception validée (validation 1). Le code Spring Boot sera ajouté dans ce dossier (`pom.xml`, `src/`).

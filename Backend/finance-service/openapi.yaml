@@ -2,13 +2,156 @@ openapi: 3.0.3
 info:
   title: finance-service
   version: 0.1.0
-  description: "Comptabilité simple, catalogue des aides et financements, demandes. Publie l'événement FundingGranted. Montants DECIMAL(12,3) en dinars tunisiens."
+  description: "Facturation, comptabilité simple et gestion du capital. Publie l'événement InvoiceIssued. Montants DECIMAL(12,3) en dinars tunisiens."
 servers:
   - url: "http://localhost:8084"
     description: "local (en production : via l'API Gateway sur 8080)"
 security:
   - bearerAuth: []
 paths:
+  /api/invoices:
+    post:
+      summary: Créer une facture
+      tags:
+        - invoices
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvoiceRequest"
+      responses:
+        "201":
+          description: Facture créée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceResponse"
+        "400":
+          description: Requête invalide
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "401":
+          description: Non authentifié (JWT absent ou invalide)
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /api/invoices/{id}:
+    get:
+      summary: Consulter une facture
+      tags:
+        - invoices
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Facture
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceResponse"
+        "401":
+          description: Non authentifié (JWT absent ou invalide)
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "404":
+          description: Ressource introuvable
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /api/projects/{id}/invoices:
+    get:
+      summary: "Factures d'un projet, filtrables par statut"
+      tags:
+        - invoices
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "DRAFT, SENT, PAID, OVERDUE ou CANCELLED"
+      responses:
+        "200":
+          description: Liste des factures
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InvoiceResponse"
+        "401":
+          description: Non authentifié (JWT absent ou invalide)
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /api/invoices/{id}/status:
+    patch:
+      summary: "Changer le statut d'une facture (SENT publie InvoiceIssued)"
+      tags:
+        - invoices
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvoiceStatusUpdate"
+      responses:
+        "200":
+          description: Facture mise à jour
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceResponse"
+        "400":
+          description: Requête invalide
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "401":
+          description: Non authentifié (JWT absent ou invalide)
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "404":
+          description: Ressource introuvable
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "409":
+          description: "Conflit avec l'état actuel"
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
   /api/transactions:
     post:
       summary: Enregistrer un revenu ou une dépense
@@ -103,50 +246,24 @@ paths:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/Problem"
-  /api/funding-options:
-    get:
-      summary: "Lister les aides et financements, filtrables par type de projet"
-      tags:
-        - funding
-      parameters:
-        - name: projectType
-          in: query
-          required: false
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Liste des financements
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/FundingOptionResponse"
-        "401":
-          description: Non authentifié (JWT absent ou invalide)
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
-  /api/funding-applications:
+  /api/capital-contributions:
     post:
-      summary: Déposer une demande de financement
+      summary: Enregistrer un apport au capital
       tags:
-        - funding
+        - capital
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ApplicationRequest"
+              $ref: "#/components/schemas/ContributionRequest"
       responses:
         "201":
-          description: Demande créée
+          description: Apport enregistré
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApplicationResponse"
+                $ref: "#/components/schemas/ContributionResponse"
         "400":
           description: Requête invalide
           content:
@@ -159,23 +276,11 @@ paths:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/Problem"
-        "404":
-          description: Ressource introuvable
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
-        "409":
-          description: "Conflit avec l'état actuel"
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
-  /api/funding-applications/{id}/status:
-    patch:
-      summary: "Changer le statut d'une demande (ACCEPTED publie FundingGranted)"
+  /api/projects/{id}/capital:
+    get:
+      summary: "Capital d'un projet et liste des apports"
       tags:
-        - funding
+        - capital
       parameters:
         - name: id
           in: path
@@ -183,33 +288,15 @@ paths:
           schema:
             type: integer
             format: int64
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ApplicationStatusUpdate"
       responses:
         "200":
-          description: Demande mise à jour
+          description: Capital
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApplicationResponse"
-        "400":
-          description: Requête invalide
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
+                $ref: "#/components/schemas/CapitalResponse"
         "401":
           description: Non authentifié (JWT absent ou invalide)
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
-        "404":
-          description: Ressource introuvable
           content:
             application/problem+json:
               schema:
@@ -234,6 +321,87 @@ components:
           type: string
         instance:
           type: string
+    InvoiceLineDto:
+      type: object
+      properties:
+        description:
+          type: string
+        quantity:
+          type: integer
+        unitPrice:
+          type: number
+          example: 120.5
+        vatRate:
+          type: number
+    InvoiceRequest:
+      type: object
+      required:
+        - projectId
+        - clientName
+        - issueDate
+        - lines
+      properties:
+        projectId:
+          type: integer
+          format: int64
+        clientName:
+          type: string
+        issueDate:
+          type: string
+          format: date
+        dueDate:
+          type: string
+          format: date
+        lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/InvoiceLineDto"
+    InvoiceResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        projectId:
+          type: integer
+          format: int64
+        number:
+          type: string
+        clientName:
+          type: string
+        issueDate:
+          type: string
+          format: date
+        dueDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum:
+            - DRAFT
+            - SENT
+            - PAID
+            - OVERDUE
+            - CANCELLED
+        totalAmount:
+          type: number
+        lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/InvoiceLineDto"
+    InvoiceStatusUpdate:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - DRAFT
+            - SENT
+            - PAID
+            - OVERDUE
+            - CANCELLED
     TransactionRequest:
       type: object
       required:
@@ -289,40 +457,31 @@ components:
           type: number
         balance:
           type: number
-    FundingOptionResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        name:
-          type: string
-        providerType:
-          type: string
-        minAmount:
-          type: number
-        maxAmount:
-          type: number
-        conditions:
-          type: string
-        projectType:
-          type: string
-    ApplicationRequest:
+    ContributionRequest:
       type: object
       required:
         - projectId
-        - fundingOptionId
-        - requestedAmount
+        - contributorName
+        - amount
+        - contributionDate
+        - kind
       properties:
         projectId:
           type: integer
           format: int64
-        fundingOptionId:
-          type: integer
-          format: int64
-        requestedAmount:
+        contributorName:
+          type: string
+        amount:
           type: number
-    ApplicationResponse:
+        contributionDate:
+          type: string
+          format: date
+        kind:
+          type: string
+          enum:
+            - CASH
+            - IN_KIND
+    ContributionResponse:
       type: object
       properties:
         id:
@@ -331,30 +490,24 @@ components:
         projectId:
           type: integer
           format: int64
-        fundingOptionId:
+        contributorName:
+          type: string
+        amount:
+          type: number
+        contributionDate:
+          type: string
+          format: date
+        kind:
+          type: string
+    CapitalResponse:
+      type: object
+      properties:
+        projectId:
           type: integer
           format: int64
-        requestedAmount:
+        totalCapital:
           type: number
-        status:
-          type: string
-          enum:
-            - DRAFT
-            - SUBMITTED
-            - ACCEPTED
-            - REJECTED
-        updatedAt:
-          type: string
-          format: date-time
-    ApplicationStatusUpdate:
-      type: object
-      required:
-        - status
-      properties:
-        status:
-          type: string
-          enum:
-            - DRAFT
-            - SUBMITTED
-            - ACCEPTED
-            - REJECTED
+        contributions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContributionResponse"

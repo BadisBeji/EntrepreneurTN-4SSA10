@@ -263,7 +263,6 @@ components:
           enum:
             - LEGAL
             - FINANCE
-            - MARKETING
         position:
           type: integer
         status:

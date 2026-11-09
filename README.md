@@ -1,6 +1,6 @@
 # EntrepreneurTN
 
-Plateforme web qui accompagne les **entrepreneurs et petites agences tunisiennes** dans le lancement et la gestion de leur activité : feuille de route, démarches légales et administratives, comptabilité et financement.
+Plateforme web qui accompagne les **entrepreneurs et petites agences tunisiennes** dans le lancement et la gestion de leur activité : feuille de route, démarches légales et administratives, facturation et comptabilité.
 
 > Projet de l'unité **Architecture web distribuée** (ESPRIT, 4SSA10) . Le code est en cours de développement.
 
@@ -23,9 +23,9 @@ Microservice commun, développé par toute l'équipe : **auth-service**.
 | auth-service (commun) | comptes, rôles, JWT | 8081 | MySQL `auth_db` |
 | roadmap-service | projets, feuille de route, progression | 8082 | MySQL `roadmap_db` |
 | legal-service | démarches légales et administratives | 8083 | MySQL `legal_db` |
-| finance-service | comptabilité, aides et financements | 8084 | MySQL `finance_db` |
+| finance-service | facturation, comptabilité et gestion du capital | 8084 | MySQL `finance_db` |
 
-Communication : **REST synchrone** (OpenFeign) de roadmap vers legal et finance ; **événements asynchrones** (RabbitMQ) `ProcedureCompleted` et `FundingGranted` vers roadmap.
+Communication : **REST synchrone** (OpenFeign) de roadmap vers legal et finance ; **événements asynchrones** (RabbitMQ) `ProcedureCompleted` et `InvoiceIssued` vers roadmap.
 
 ## Technologies
 Angular · Spring Boot 3.5 (Java 17) · Spring Cloud Gateway · Eureka · OpenFeign · Spring Security (JWT) · MySQL (phpMyAdmin) · RabbitMQ · Swagger / OpenAPI · Git.

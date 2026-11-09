@@ -10,8 +10,8 @@ Cœur du produit : projets, feuille de route, progression.
 | Contrat d'API | [`openapi.yaml`](openapi.yaml) (à ouvrir dans https://editor.swagger.io) |
 
 ## Interactions
-- **Appelle** (synchrone, OpenFeign) : `legal-service` `GET /api/procedures?projectType=` et `finance-service` `GET /api/funding-options?projectType=`
-- **Consomme** (asynchrone) : `ProcedureCompleted` (legal) et `FundingGranted` (finance) -> étape `DONE` + progression recalculée
+- **Appelle** (synchrone, OpenFeign) : `legal-service` `GET /api/procedures?projectType=` (démarches) et `finance-service` `GET /api/projects/{id}/summary` (bilan du tableau de bord)
+- **Consomme** (asynchrone) : `ProcedureCompleted` (legal) et `InvoiceIssued` (finance) -> étape `DONE` + progression recalculée
 
 ## État
 Conception validée (validation 1). Le code Spring Boot sera ajouté dans ce dossier (`pom.xml`, `src/`).
