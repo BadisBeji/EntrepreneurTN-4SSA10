@@ -6,7 +6,7 @@ Cœur du produit : projets, feuille de route, progression.
 |---|---|
 | Port | 8082 |
 | Base de données | MySQL (phpMyAdmin) – roadmap_db |
-| Responsable | [Membre 1] |
+| Responsable | Badis Beji |
 | Contrat d'API | [`openapi.yaml`](openapi.yaml) (à ouvrir dans https://editor.swagger.io) |
 
 ## Interactions

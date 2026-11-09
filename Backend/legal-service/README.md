@@ -6,7 +6,7 @@ Catalogue des démarches légales et administratives, suivi par projet.
 |---|---|
 | Port | 8083 |
 | Base de données | MySQL (phpMyAdmin) – legal_db |
-| Responsable | [Membre 2] |
+| Responsable | Yakine Sehli |
 | Contrat d'API | [`openapi.yaml`](openapi.yaml) (à ouvrir dans https://editor.swagger.io) |
 
 ## Interactions

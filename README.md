@@ -7,7 +7,7 @@ Plateforme web qui accompagne les **entrepreneurs et petites agences tunisiennes
 ## Équipe
 | Membre | Microservice |
 |---|---|
-| Badis Beji | roadmap-service (+ présente le microservice commun) |
+| Badis Beji | roadmap-service |
 | Yakine Sehli| legal-service |
 | Mohammed Saadallah | finance-service |
 

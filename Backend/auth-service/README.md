@@ -6,7 +6,7 @@ Commun : développé par toute l'équipe.
 |---|---|
 | Port | 8081 |
 | Base de données | MySQL (phpMyAdmin) – auth_db |
-| Responsable | [Membre 1] (présente le service) |
+| Responsable | Toute l'équipe (service commun) |
 | Contrat d'API | [`openapi.yaml`](openapi.yaml) (à ouvrir dans https://editor.swagger.io) |
 
 ## Interactions
