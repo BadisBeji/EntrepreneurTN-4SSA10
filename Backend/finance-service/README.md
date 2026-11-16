@@ -11,6 +11,7 @@ Facturation, comptabilité simple et gestion du capital.
 
 ## Interactions
 - **Publie** (asynchrone) : `InvoiceIssued {projectId, invoiceId, issuedAt}` quand une facture passe à `SENT`
+- **Consomme** (asynchrone) : `OrderConfirmed` (supplier) -> enregistre une dépense `EXPENSE`
 - **Appelé par** : `roadmap-service` (synchrone, bilan)
 
 ## État

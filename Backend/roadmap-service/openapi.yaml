@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: roadmap-service
   version: 0.1.0
-  description: "Projets, feuille de route, étapes et progression. Appelle legal-service et finance-service (synchrone) et consomme leurs événements (asynchrone)."
+  description: "Projets, feuille de route, étapes et progression. Appelle legal-service et finance-service (synchrone) et consomme les événements de legal, finance et marketing (asynchrone)."
 servers:
   - url: "http://localhost:8082"
     description: "local (en production : via l'API Gateway sur 8080)"
@@ -263,6 +263,7 @@ components:
           enum:
             - LEGAL
             - FINANCE
+            - MARKETING
         position:
           type: integer
         status:

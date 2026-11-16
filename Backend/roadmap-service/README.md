@@ -11,7 +11,7 @@ Cœur du produit : projets, feuille de route, progression.
 
 ## Interactions
 - **Appelle** (synchrone, OpenFeign) : `legal-service` `GET /api/procedures?projectType=` (démarches) et `finance-service` `GET /api/projects/{id}/summary` (bilan du tableau de bord)
-- **Consomme** (asynchrone) : `ProcedureCompleted` (legal) et `InvoiceIssued` (finance) -> étape `DONE` + progression recalculée
+- **Consomme** (asynchrone) : `ProcedureCompleted` (legal), `InvoiceIssued` (finance) et `CampaignLaunched` (marketing) -> étape `DONE` + progression recalculée
 
 ## État
 Conception validée (validation 1). Le code Spring Boot sera ajouté dans ce dossier (`pom.xml`, `src/`).
